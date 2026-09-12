@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useLayoutEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 export interface Usuario {
     id: number;
@@ -27,11 +27,11 @@ interface PokemonContextType {
     entrenadores : Usuario[];
     entrandorActivo : Usuario | null;
     mochilaActual : PokemonTarjeta[];
-    seleccionarEntrenador : (usuario: Usuario) => void;
-    registrarEntrenador : (usuario: Usuario) => void;
-    guardarMochila : (pokemon : PokemonTarjeta) => void;
-    actualizarFavorito : (pokemonID: number) => void;
-    eliminarPokemon : (pokemonID: number) => void;
+    seleccionarEntrenador : (usuario : Usuario) => void;
+    registrarEntrenador : (usuario : Usuario) => void;
+    guardarPokemonMochila : (pokemon : PokemonTarjeta) => void;
+    actualizarFavorito : (pokemonId : number) => void;
+    eliminarPokemon : (pokemonId: number) => void;
 
 
 }
@@ -39,11 +39,11 @@ interface PokemonContextType {
 const PokemonContext = createContext<PokemonContextType | undefined> (undefined);
 
 export const PokemonProvider : React.FC<{ children : React.ReactNode}> = ({ children }) => {
-    const [entrandores,setEntrenadores] = useState<Usuario[]>([]);
+    const [entrenadores,setEntrenadores] = useState<Usuario[]>([]);
     const [entrenadorActivo,setEntrenadorActivo] = useState<Usuario[] | null> (null);
     const [mochilaActual,setMochilaActual] = useState<PokemonTarjeta[] | null> (null);
 
-    useLayoutEffect(() => {
+    useEffect(() => {
         const data = localStorage.getItem('lista_entrenadores');
         if(data){
             const lista : Usuario[]= JSON.parse(data); 
@@ -66,9 +66,60 @@ export const PokemonProvider : React.FC<{ children : React.ReactNode}> = ({ chil
 
     const seleccionarEntrenador = (usuario : Usuario) => {
         setEntrenadorActivo(usuario);
-        
         localStorage.setItem('entrenador_activo_id', usuario.id.toString());
         cargarMochilaEntrenador(usuario.id);
     }
 
-} 
+    const registrarEntrenador = (nuevoUsuario : Usuario) => {
+        const actualizados = [...entrenadores, nuevoUsuario];
+        setEntrenadores(actualizados);
+        localStorage.setItem('lista_entrenadores', JSON.stringify(actualizados));
+        seleccionarEntrenador(nuevoUsuario);
+    };
+
+    const guardarPokemonMochila = (pokemon : PokemonTarjeta) => {
+        if(!entrenadorActivo) return;
+        const actualizada = [...mochilaActual, {...pokemon, esFavorito: false}];
+        setMochilaActual(actualizada);
+        localStorage.setItem(`mochila_${entrenadorActivo.id}`, JSON.stringify(actualizada));
+
+    };
+
+    const actualizarFavorito =(pokemonId: number) => {
+        if(!entrenadorActivo) return;
+        const actualizada = mochilaActual.map(p => p.id === pokemonId ? {...p, esFavorito: !p.esFavorito } : p);
+        setMochilaActual(actualizada);
+        localStorage.setItem(`mochila_${entrenadorActivo.id}`, JSON.stringify(actualizada));
+    }
+
+    const eliminarPokemon =(pokemonId: number) => {
+        if (!entrenadorActivo) return;
+        const filtrado = mochilaActual.filter(p => p.id !== pokemonId);
+        setMochilaActual(filtrado);
+        localStorage.setItem(`mochila_${entrenadorActivo.id}`, JSON.stringify(actualizada));
+    };
+
+    return (
+        <PokemonContext.Provider value={{
+            entrenadores, 
+            entrenadorActivo,
+            mochilaActual,
+            seleccionarEntrenador,
+            registrarEntrenador,
+            guardarPokemonMochila,
+            actualizarFavorito,
+            eliminarPokemon
+
+        }} >
+            { children }
+
+        </PokemonContext.Provider>
+    );
+
+        };
+export const usePokemon = () => {
+    const context = useContext(PokemonContext);
+    if(!context) throw new Error('usePokemon debe usarse en un provider');
+    return context;
+}
+
