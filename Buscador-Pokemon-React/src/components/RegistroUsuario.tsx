@@ -1,9 +1,11 @@
+
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePokemon, type Usuario } from '../context/PokemonContext';
 
 export const RegistroUsuario: React.FC = () => {
-  const { registrarEntrenador } = usePokemon();
+  const { entrenadores, entrenadorActivo, registrarEntrenador, seleccionarEntrenador } = usePokemon();
   const navigate = useNavigate();
 
   const [nombre, setNombre] = useState('');
@@ -35,7 +37,7 @@ export const RegistroUsuario: React.FC = () => {
     };
 
     registrarEntrenador(nuevo);
-    navigate('/buscador');
+    navigate('/pokemon');
   };
 
   return (
@@ -177,6 +179,21 @@ export const RegistroUsuario: React.FC = () => {
           </div>
         </form>
       </div>
-    </div>
+
+      {entrenadores.length > 0 && (
+        <div> 
+          <h3> Cambiar Entrenador </h3>
+          <div>
+            {entrenadores.map((user) => (
+              <button key={user.id} type="button" onClick={() => seleccionarEntrenador(user)}
+              style={{  backgroundcolor: entrenadorActivo?.id === user.id ? '#FF00FF' : '#E0E0E0',
+                color: entrenadorActivo?.id === user.id ? 'white' : 'black',
+                padding: '6px 12px' }}> {user.nombreCompleto}</button>
+            ))}
+        </div>
+      </div>
+      )
+    }
+  </div>
   );
 };

@@ -18,14 +18,14 @@ export interface PokemonTarjeta {
     name: string;
     image: string;
     type: string;
-    baseExperoemce: string;
+    baseExperience: string;
     esFavorito?: boolean;
 
 }
 
 interface PokemonContextType {
     entrenadores : Usuario[];
-    entrandorActivo : Usuario | null;
+    entrenadorActivo : Usuario | null;
     mochilaActual : PokemonTarjeta[];
     seleccionarEntrenador : (usuario : Usuario) => void;
     registrarEntrenador : (usuario : Usuario) => void;
