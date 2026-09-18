@@ -40,8 +40,8 @@ const PokemonContext = createContext<PokemonContextType | undefined> (undefined)
 
 export const PokemonProvider : React.FC<{ children : React.ReactNode}> = ({ children }) => {
     const [entrenadores,setEntrenadores] = useState<Usuario[]>([]);
-    const [entrenadorActivo,setEntrenadorActivo] = useState<Usuario[] | null> (null);
-    const [mochilaActual,setMochilaActual] = useState<PokemonTarjeta[] | null> (null);
+    const [entrenadorActivo,setEntrenadorActivo] = useState<Usuario | null> (null);
+    const [mochilaActual,setMochilaActual] = useState<PokemonTarjeta[]> ([]);
 
     useEffect(() => {
         const data = localStorage.getItem('lista_entrenadores');
@@ -96,7 +96,7 @@ export const PokemonProvider : React.FC<{ children : React.ReactNode}> = ({ chil
         if (!entrenadorActivo) return;
         const filtrado = mochilaActual.filter(p => p.id !== pokemonId);
         setMochilaActual(filtrado);
-        localStorage.setItem(`mochila_${entrenadorActivo.id}`, JSON.stringify(actualizada));
+        localStorage.setItem(`mochila_${entrenadorActivo.id}`, JSON.stringify(filtrado));
     };
 
     return (
